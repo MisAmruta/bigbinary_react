@@ -1,0 +1,66 @@
+
+.modal {
+    background-color: white;
+  
+   
+  
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    flex-direction: column;
+    height: 400px;
+    width: 350px;
+  
+   
+  
+    border-radius: 5px;
+  }
+  .modal:active,
+  :focus {
+    /* outline: none; */
+    border: 1px solid black;
+  }
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 10px;
+    text-align: center;
+  }
+  
+   
+  
+  .close {
+    background: transparent;
+    border: none;
+    font-weight: 500;
+    font-size: 40px;
+  }
+  
+   
+  
+  .modal-title {
+    font-weight: 800;
+    font-size: 27px;
+    margin-left: 16px;
+  }
+  
+  .imgleft{
+      border-radius: 50%;
+  }
+
+  .table-responsive{
+      display: flex;
+      align-items: flex-start;
+      float: left;
+  }
+
+  
+  
+  
+  
+  
