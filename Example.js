@@ -6,8 +6,13 @@ import "./Example.css";
 import ReactPaginate from "react-paginate";
 import ModalExample from "./ModalExample";
 import Calendar from 'react-calendar';
+import Moment from 'moment';
+
+
 
 const Example = (props) => {
+  const [start, setStart] = useState(new Date());
+  const [end, setEnd] = useState(new Date());
   const [modal, setModal] = useState(false);
   const [ind, setInd] = useState(0);
   const toggle = (index) => {setModal(!modal)
@@ -15,7 +20,7 @@ const Example = (props) => {
 }
   const [currentPage, setCurrentPage] = useState(0);
   const [data, setData] = useState([]);
-  const[upcoming,setUpcoming]=useState([]);
+ 
 
   // calendar
   const[date,setDate]=useState(new Date())
@@ -31,7 +36,7 @@ const Example = (props) => {
       <tr>
         <td>{item.flight_number}</td>
         <td>{item.launch_date_utc}</td>
-        <td>{item.launch_site.site_name}</td>
+        <td>{item.launch_site?.site_name}</td>
         <td
           onClick={()=>toggle(index)}
           data-toggle="modal"
@@ -54,14 +59,14 @@ const Example = (props) => {
                   <div class="modal-header row">
                     <div className="col-sm-2 col-6 imgleft">
                       <img
-                        src={data[ind].links.mission_patch}
+                        src={data[ind].links?.mission_patch}
                         width="72px"
                         height="72px"
                       />
                     </div>
                     <div className="col-sm-4 col-6" style={{display:'flex',flexDirection:'column',justifyContent:'flex-start',alignItems:'center'}}>
                       <h5>{data[ind].mission_name}</h5>
-                      <h6>{data[ind].rocket.rocket_name}</h6>
+                      <h6>{data[ind].rocket?.rocket_name}</h6>
                       
                     </div>
                     <span>  {data[ind].launch_failure_details
@@ -95,19 +100,19 @@ const Example = (props) => {
                         </tr>
                         <tr>
                           <td>Rocket Type</td>
-                          <td>{data[ind].rocket.rocket_type}</td>
+                          <td>{data[ind].rocket?.rocket_type}</td>
                         </tr>
                         <tr>
                           <td>Rocket Name</td>
-                          <td>{data[ind].rocket.rocket_name}</td>
+                          <td>{data[ind].rocket?.rocket_name}</td>
                         </tr>
                         <tr>
                           <td>Manifactures</td>
-                          <td>{data[ind].rocket.second_stage.payloads[0].manufacturer}</td>
+                          <td>{data[ind].rocket?.second_stage.payloads[0]?.manufacturer}</td>
                         </tr>
                         <tr>
                           <td>Nationality</td>
-                          <td>{data[ind].rocket.second_stage.payloads[0].nationality}</td>
+                          <td>{data[ind].rocket?.second_stage.payloads[0]?.nationality}</td>
                         </tr>
                         <tr>
                           <td>Launch Date</td>
@@ -115,15 +120,15 @@ const Example = (props) => {
                         </tr>
                         <tr>
                           <td>Payload Type</td>
-                          <td>{data[ind].rocket.second_stage.payloads[0].payload_type}</td>
+                          <td>{data[ind].rocket?.second_stage.payloads[0]?.payload_type}</td>
                         </tr>
                         <tr>
                           <td>Orbit</td>
-                          <td>{data[ind].rocket.second_stage.payloads[0].orbit}</td>
+                          <td>{data[ind].rocket?.second_stage.payloads[0]?.orbit}</td>
                         </tr>
                         <tr>
                           <td>Launch Site</td>
-                          <td>{data[ind].launch_site.site_name}</td>
+                          <td>{data[ind].launch_site?.site_name}</td>
                         </tr>
                       </tbody>
                     </table>
@@ -133,13 +138,13 @@ const Example = (props) => {
             </div>
           </>
         </td>
-        <td>{item.rocket.second_stage.payloads[0].orbit}</td>
+        <td>{item.rocket?.second_stage.payloads[0]?.orbit}</td>
         <td>
           {item.launch_failure_details
             ? "Failed"
             : `${item.launch_success ? "Success" : "Upcoming"}`}
         </td>
-        <td>{item.rocket.rocket_name}</td>
+        <td>{item.rocket?.rocket_name}</td>
       </tr>
     );
   });
@@ -159,9 +164,7 @@ const Example = (props) => {
     fetchData();
   }, []);
 
-  // useEffect(() => {
-  //   upcomingChange();
-  // }, []);
+ 
 
   function fetchData() {
     fetch("https://api.spacexdata.com/v3/launches", {
@@ -184,8 +187,98 @@ const Example = (props) => {
         }) .then((res)=>res.json())
             .then((data)=>{
               console.log("upcoming data",data)
-              setUpcoming(data);
+              setData(data);
             })
+    }
+    const successChange=()=>{
+        fetch('https://api.spacexdata.com/v3/launches/past',{
+          method:'get'
+        }) .then((res)=>res.json())
+            .then((data)=>{
+             
+              const result = data.filter(item=>item.launch_success==true)
+              setData(result);
+              console.log("success data",result)
+            })
+    }
+    const failedChange=()=>{
+        fetch('https://api.spacexdata.com/v3/launches/past',{
+          method:'get'
+        }) .then((res)=>res.json())
+            .then((data)=>{
+             
+              const result = data.filter(item=>item.launch_success==false)
+              setData(result);
+              console.log("failed data",result)
+            })
+    }
+
+    const handleFilter = (e)=>{
+        console.log("dropdown data",e.target.value);
+        if(e.target.value=='All'){
+          fetchData();
+        }
+        else if(e.target.value=='Upcoming'){
+          upcomingChange();
+        }
+        else if(e.target.value=='Successful'){
+          successChange();
+        }
+         else if(e.target.value=='Failed'){
+          failedChange();
+        }
+        
+    }
+
+    const handleCalendar = (e)=>{
+          e.preventDefault()
+          
+      // const filteredDates = data.filter(d =>new Date().getDate() - new Date(d.launch_date_utc).getDate() <= 7);
+
+      // // const newDate = new Date(data[0].launch_date_utc).getDate()
+      // console.log("week date",filteredDates);
+
+  //     var startDate = new Date("2006-08-04");
+  //     var endDate = new Date("2018-08-12");
+
+  // var resultProductData = data.filter((a)=>​​​​​​{
+  // var date = new Date(a.launch_date_utc);
+  // return (date >= startDate && date <= endDate);
+  // ​​​​​​​​});
+  //   console.log("date",resultProductData);
+      let newData = data.map(item=> {
+    return Moment(item.launch_date_utc).format("YYYY-MM-DD");
+      } )
+    
+      let startDate = Moment(start).format("YYYY-MM-DD")
+      let endDate = Moment(end).format("YYYY-MM-DD")
+
+      let result = newData.map(item=> {
+    if (Moment(item).isBetween(startDate, endDate)){
+          return item;
+    }
+      })
+        result = result.filter(item=> item)
+
+        // let resultData = result.map(item=> {
+        //   data.map(ind=> {
+        //     if(Moment(ind.launch_date_utc).format("YYYY-MM-DD")== item){
+        //       console.log('',ind);
+        //       return ind;
+        //     }
+        //   })
+        // })
+
+        let resultData = data.map(item => {
+          if(result.includes(Moment(item.launch_date_utc).format("YYYY-MM-DD"))){
+            return item;
+          }
+        })
+        resultData = resultData.filter(item=> item)
+        setData(resultData)
+
+      console.log("date ", resultData)
+
     }
 
   return (
@@ -246,7 +339,7 @@ const Example = (props) => {
 
       <div className="row">
         <div className="col-sm-3 mb-4 float-left col-6">
-          <div class="dropdown">
+          {/* <div class="dropdown">
             <button
               class="btn btn-light dropdown-toggle"
               type="button"
@@ -268,8 +361,8 @@ const Example = (props) => {
                   fill="#4B5563"
                 />
               </svg>
-              {/* <Calendar onChange={dateChange}
-              value={date} /> */}
+              <Calendar onChange={dateChange}
+              value={date} />
               Past 6 months
             </button>
             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
@@ -284,10 +377,35 @@ const Example = (props) => {
               </a>
             </div>
           </div>
+        */}
+
+{/* <select class="form-select" aria-label="Default select example" onChange={(e)=>handleCalendar(e)}>
+  <option selected>Past 6 months</option>
+  <option value="week">past week</option>
+  <option value="month"> past month</option>
+  <option value="3month"> last 3 months</option>
+  </select> */}
+
+{/* <button>
+  <Calendar onChange={dateChange}
+              value={date} />
+              </button> */}
+                
+   
+  <form className='row'>
+  <input class="form-control" type="date" value={start} onChange={(e)=>{setStart(e.target.value)}} id="example-date-input" />
+  <input class="form-control" type="date" value={end} onChange={(e)=>{setEnd(e.target.value)}} id="example-date-input" />
+  <button onClick={(e)=>handleCalendar(e)}>
+    sort
+  </button>
+  </form>
+
+ 
         </div>
+       
         <div className="col-sm-6"></div>
         <div className="col-sm-3 mb-4 float-right col-6">
-          <div class="dropdown">
+          {/* <div class="dropdown">
             <button
               class="btn btn-light dropdown-toggle"
               type="button"
@@ -325,6 +443,15 @@ const Example = (props) => {
               </a>
             </div>
           </div>
+        */}
+
+  <select class="form-select" aria-label="Default select example" onChange={(e)=>handleFilter(e)}>
+  <option selected>All Launches</option>
+  <option value="All">All Launches</option>
+  <option value="Upcoming"> Upcoming Launches</option>
+  <option value="Successful"> Successful Launches</option>
+  <option value="Failed"> Failed Launches</option>
+  </select>
         </div>
       </div>
 
